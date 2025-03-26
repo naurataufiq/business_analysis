@@ -1,0 +1,17 @@
+name: "business-analysis"
+navbar:
+  title: "Exploring Yelp Toronto Businesses and Their Reviews in Relation to Nearby Attractions"
+  left:
+    - text: "Home"
+      href: index.html
+    - text: "Report"
+      href: report.html
+  right:
+    - icon: fa-github fa-lg
+      href: https://github.com/naurataufiq/business-analysis
+output:
+  html_document:
+    theme: cosmo
+    include:
+      after_body: footer.html
+    css: styles.css
