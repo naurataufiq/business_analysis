@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.6.42">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>Exploring Yelp Toronto Businesses and Their Reviews in Relation to Nearby Attractions</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script><script src="business_analysis_files/libs/clipboard/clipboard.min.js"></script>
+<script src="business_analysis_files/libs/quarto-html/quarto.js"></script>
+<script src="business_analysis_files/libs/quarto-html/popper.min.js"></script>
+<script src="business_analysis_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="business_analysis_files/libs/quarto-html/anchor.min.js"></script>
+<link href="business_analysis_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="business_analysis_files/libs/quarto-html/quarto-syntax-highlighting-2f5df379a58b258e96c21c0638c20c03.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="business_analysis_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="business_analysis_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="business_analysis_files/libs/bootstrap/bootstrap-c0367b04c37547644fece4185067e4a7.min.css" rel="stylesheet" append-hash="true" id="quarto-bootstrap" data-mode="light">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Exploring Yelp Toronto Businesses and Their Reviews in Relation to Nearby Attractions</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
+
+
+<section id="naura-izzah-taufiq-1009713669" class="level3">
+<h3 class="anchored" data-anchor-id="naura-izzah-taufiq-1009713669">Naura Izzah Taufiq (1009713669)</h3>
+</section>
+<section id="a.-introduction" class="level2">
+<h2 class="anchored" data-anchor-id="a.-introduction">A. Introduction</h2>
+<p>Tourism plays a major role in shaping the economy of Toronto, Canada’s largest city and a popular tourist destination. Understanding how proximity to attractions influences business success can offer valuable insights for business owners, urban planners, and tourism boards. This study investigates whether businesses near Toronto’s tourist attractions perform better in ratings and review volume compared to those farther away. It also examines whether certain attractions are linked to higher ratings and more positive reviews. Additionally, the project explores how review sentiment differs between businesses located near and far from popular attractions, along with analyzing Toronto businesses’ overall review sentiment.</p>
+<p>This analysis uses three datasets. The first is the Places of Interest and Toronto Attractions dataset from Toronto Open Data, sourced from the Toronto Tourist Information Centre. The other two are Yelp datasets from Kaggle, originally from Yelp Open Dataset. These include Yelp Business data (business details like name, location, rating, review counts, categories) and Yelp Review data (filtered to only include Toronto business reviews).</p>
+<p>By merging these datasets and applying data analysis techniques, this study aims to explore the relationship between business performance and proximity to attractions, while also analyzing general sentiment trends in Toronto business reviews.</p>
+</section>
+<section id="b.-methods" class="level2">
+<h2 class="anchored" data-anchor-id="b.-methods">B. Methods</h2>
+<section id="b.1-loading-and-merging-datasets" class="level3">
+<h3 class="anchored" data-anchor-id="b.1-loading-and-merging-datasets">B.1 Loading and Merging Datasets</h3>
+<p>The datasets for this project were obtained from the Toronto Open Data API and Kaggle (Yelp Open Data subsets). The Toronto Open Data API was accessed via the CKAN interface to retrieve the “Places of Interest and Toronto Attractions” dataset, which provides information such as attraction name, category, and geographical coordinates as well as some other details like contacts, websites and a short bio. The Yelp Business and Review datasets were downloaded then read. The Business dataset provides information about business names, locations and coordinates, ratings, categories, and review counts. Finally, the Review dataset offers textual reviews, ratings, and dates as well as the user and business information.</p>
+<p>Before proceeding with creating new variables and merging the datasets, it is crucial to address duplicate entries within each dataset to prevent inflation (double duplicates) of the merged dataset. For the attractions dataset, duplicates were identified by comparing entries with the same name. For the business dataset, duplicates were detected by examining rows with matching business names, addresses, neighborhoods, and postal codes since a chain will have the same names but diffent locations. Finally, for the reviews dataset, duplicates were identified by comparing user IDs, review texts, business IDs, and ratings as one user may write the same texts for other businesses.</p>
+<p>The most significant issue was found in the business dataset, where 356 duplicate rows were identified. Upon observation, it seemed like this might be caused by update in business information (perhaps the opening of a new renovation/closing of the business, or updating the review count). The most significant issue was 356 duplicate rows in the business dataset, likely due to updates in business information. We retained the most recent data based on whether the business is open or has the highest review count. This reduced the total entries from 174,567 to 174,387 (note that this is still not exclusive to Toronto only).</p>
+<p>WWe filtered Yelp Business data to only include Toronto businesses and merged it with the attractions dataset by finding the nearest attraction for each business. Missing values were first addressed by removing entries lacking coordinates information since it was pertinent for this step. Then, to identify the nearest tourist attraction for each business, we constructed a KDTree spatial index using the attraction coordinates. Each business was linked to its nearest attraction, and the distance between them was calculated. This result in a dataset that contains Toronto business details and the nearest attraction information for that business (id, name, category and its distance from the business).</p>
+<p>We also merged the Toronto business data with the reviews data such that now we have more details on the business that the user reviewed upon. That concluded this loading and merging dataset step (primarily using pandas), and we are ready to do exploratory data analysis.</p>
+</section>
+<section id="b.2-data-wrangling-and-exploratory-data-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="b.2-data-wrangling-and-exploratory-data-analysis">B.2 Data Wrangling and Exploratory Data Analysis</h3>
+<p>We primarily used Pandas for data wrangling. We first observed the two datasets (Toronto business data with attractions information, Toronto reviews data with business details) by its dimensions and columns. The business data has 17,199 observations with 17 variables: business ID, name of the business, its neighborhood, its full address, city (Toronto), state (ON), postal code, latitude, longitude, average ratings, review count (total number of reviews), is_open (indicating whether the business is open or not), categories (which categories do the business offer; may be restaurant/cafe and its cuisine_type, the services, etc.) alongside the nearest attraction details (IDs, name, category, and the distance to that business). Most variables are character/string object, except some numerical variables like coordinates (continuous), review counts (discrete), attraction IDs (discrete), is_open (binary number) and attraction distance in kilometer (continuous).</p>
+<p>The reviews Data Shape has 430,985 reviews and 11 variables: review IDs, user ID that wrote that review, business ID and business name of the intended review, rating, date of the review, the review text, reactions (number of upvote for useful/funny/cool) and the categories of the business. Again, most variables are character/string object, except some numerical variables like rating (discrete from 1-5) and reactions. Note that we also decided to rename some variables for readability.</p>
+<p>Upon observing the summary of the datas, we found some missing values for some columns like business neighborhood and postal code that we decided to ignore since it did not affect much of our later analysis. However, we realized there were some variables that needed further check.</p>
+<ol type="1">
+<li><p>Geographical filtering was applied to validate the coordinates, ensuring that businesses were located within Toronto’s boundaries (latitude: 43.5-43.9, longitude: -79.6-79.2). We decided to remove anything outside since they were no longer in Toronto city.</p></li>
+<li><p>There were two unique state so corrections were made for state code errors (‘AB’ to ‘ON’) to maintain consistency. It turned out to be a mistake since the address for that business was in Toronto.</p></li>
+<li><p>There were duplicates in the review texts. We decided to perform extensive cleaning. First, we identified several texts occurring multiple times. To further investigate, we checked for exact duplicates where the same review text, business ID, and review ID were repeated. No exact duplicates were found, but some reviews were associated with multiple user IDs. Thus, we sorted reviews by date and retained only the oldest instance of each duplicated review text, assuming the earliest review was the original. We also removed cases where the same review text was associated with multiple users. Note that we did not remove the duplicated text for different business IDs as the rationale would be that it is possible for one user to use the same review for another business.</p></li>
+</ol>
+<p>This process reduced the dataset from 430,985 to 430,906 entries, ensuring that the dataset accurately reflects genuine customer feedback for reliable analysis.</p>
+<p>Finally, we conducted summary statistics of some variables and created exploratory graphs using matplotlib and seaborn libraries to see insights surrounding the initial questions. We defined businesses within 1 kilometer of a tourist attraction as “near tourist attractions” and those beyond this distance as “regular neighborhoods” and explored if there is a difference in business metrics. We also see if that has anything to do with the attraction type.</p>
+<p>To gain insights from the review text data, we performed sentiment analysis using the VADER (Valence Aware Dictionary and sEntiment Reasoner) sentiment analysis tool from the nltk library. For each review, we produced a dictionary containing four sentiment metrics: positive, negative, neutral, and compound scores. The compound score, which ranges from -1 (most negative) to +1 (most positive), was extracted for further analysis.</p>
+<p>Based on the compound score, reviews were labeled as positive (score &gt; 0.05), neutral (score between -0.05 and 0.05), or negative (score &lt; -0.05). This allowed us to analyze the relationship between sentiment distribution and user rating. The sentiment data was also merged with the business dataset to link reviews with their nearest attraction categories. The average sentiment score was calculated for each attraction category, also for those near attractions/regular neighbourhoods.</p>
+</section>
+</section>
+<section id="preliminary-results" class="level2">
+<h2 class="anchored" data-anchor-id="preliminary-results">3. Preliminary Results</h2>
+<section id="businesses-near-tourist-attractions-vs.-regular-neighborhoods" class="level3">
+<h3 class="anchored" data-anchor-id="businesses-near-tourist-attractions-vs.-regular-neighborhoods">3.1 Businesses Near Tourist Attractions vs.&nbsp;Regular Neighborhoods</h3>
+<p>The analysis revealed interesting patterns in the data. Both businesses in regular neighborhoods and those near tourist attractions have similar average ratings (3.51 and 3.48, respectively). The boxplot (Plot 1) illustrates this. However, businesses near attractions receive significantly more reviews on average (29.93 vs.&nbsp;17.37). Additionally, nearly twice as many businesses are located within 1 km of attractions (10,572) compared to those farther away (6,487) as written in Table 1. Plot 2 illustrates that businesses near tourist attractions not only have higher average review counts but also include more outliers with extremely high review counts (Table 1 also indicates higher review average). Some businesses near tourist attractions have received over 1,400 reviews, while the maximum for businesses in regular neighborhoods is around 450. This suggests that proximity to tourist attractions drives increased visibility and customer engagement, even if it doesn’t necessarily lead to higher ratings.</p>
+<div id="5d3886ed" class="cell" data-execution_count="68">
+<div class="cell-output cell-output-stdout">
+<pre><code>Table 1: Businesses Near Tourist Attractions vs. Regular Neighborhoods
+                 Metric  Near Tourist Attractions (&lt;= 1 km)  \
+0        Average Rating                                3.48   
+1  Average Review Count                               29.93   
+2  Number of Businesses                            10572.00   
+
+   Regular Neighborhoods (&gt; 1 km)  
+0                            3.51  
+1                           17.37  
+2                         6487.00  
+                 Metric  Near Tourist Attractions (&lt;= 1 km)  \
+0        Average Rating                                3.48   
+1  Average Review Count                               29.93   
+2  Number of Businesses                            10572.00   
+
+   Regular Neighborhoods (&gt; 1 km)  
+0                            3.51  
+1                           17.37  
+2                         6487.00  </code></pre>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-24-output-2.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-24-output-3.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="business-performance-by-attraction-category" class="level3">
+<h3 class="anchored" data-anchor-id="business-performance-by-attraction-category">3.2 Business Performance by Attraction Category</h3>
+<p>Furthermore, businesses near cultural and nature-oriented attractions, such as performing arts, galleries, and parks, generally receive higher ratings and more positive sentiments compared to businesses near transportation hubs and convention centers (Plot 3). Businesses near performing arts have the highest average ratings (approximately 3.7), followed by businesses near galleries and nature/parks (both above 3.5). In contrast, businesses near transportation hubs and convention/trade centers have relatively lower average ratings (around 3.0-3.2). These findings suggest that certain types of attractions may be more conducive to positive customer experiences, possibly due to the relaxing or aesthetically pleasing environments they provide.</p>
+<div id="787e0a25" class="cell" data-execution_count="29">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-25-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+<section id="sentiment-analysis-of-reviews" class="level3">
+<h3 class="anchored" data-anchor-id="sentiment-analysis-of-reviews">3.3 Sentiment Analysis of Reviews</h3>
+<p>The sentiment analysis of review texts revealed a strongly positive skew in the data. We can see that the majority of reviews express positive sentiment, and the minority is neutral (Plot 4). On Table 1, the exact count confirms this, where we have 373,503 reviews that express positive sentiment, making up 86.6% of the data we have (illustrated by Plot 5). This distribution shows the general tendency of customers to leave positive reviews on Yelp, whereas 12.1% express negative sentiment, and only 1.3% are neutral reviews.</p>
+<div id="e4925299" class="cell" data-execution_count="31">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-27-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<div id="d70145b2" class="cell" data-execution_count="66">
+<div class="cell-output cell-output-stdout">
+<pre><code>Table 1: Sentiment Distribution
+                  Count  Percentage
+sentiment_label                    
+positive         373503   86.678533
+negative          51956   12.057386
+neutral            5447    1.264081</code></pre>
+</div>
+</div>
+<div id="e1591463" class="cell" data-execution_count="34">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-30-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>We also found out that as star ratings increase from 1 to 5, sentiment scores generally become more positive and less variable (as expected, shown on Plot 6). One-star ratings mostly show negative sentiment (median around -0.4), while five-star ratings consistently show high positive sentiment (median above 0.9). Interestingly, even 3-star ratings have a generally positive sentiment median despite being considered “average” ratings, though they have notable negative outliers, so this matched with our finding above that the reviews tend to skew positively.</p>
+<div id="4b568b90" class="cell" data-execution_count="69">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-31-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Businesses with the nearest attractions being cultural venues like performing Arts, galleries, and parks generate the highest sentiment scores for their reviews (with businesses near Performing Arts on average reached almost 0.7 in score), while businesses near transportation facilities and convention/trade centers receive the lowest sentiment scores (around 0.5-0.55). This matched our previous finding of which businesses category have the higher ratings, and our analysis above that generally higher rating produces higher sentiment score (more positive review). However, it is worth mentioing that most attraction categories maintain positive sentiment scores overall, suggesting visitors generally have favorable experiences across business with any attractions nearby.</p>
+<div id="b7594b63" class="cell" data-execution_count="70">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-33-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Knowing that businesses near attractions generally have positive reviews, we wanted to compare between those which are really closed by the attractions (under or equal to 1 km of distance near the attractions) and those located in regular neighbourhoods. Surprisingly, there is not much of a difference; those in regular neighbourhoods still have on average positive reviews, similar to the really-near attractions ones as shown in Plot 8.</p>
+<div id="e0b0d93f" class="cell" data-execution_count="60">
+<div class="cell-output cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="business_analysis_files/figure-html/cell-35-output-1.png" class="img-fluid figure-img"></p>
+</figure>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="conclusion-and-next-step" class="level2">
+<h2 class="anchored" data-anchor-id="conclusion-and-next-step">4. Conclusion and Next Step</h2>
+<p>This analysis has provided several key insights into how tourist attractions influence business performance in Toronto. Businesses near tourist attractionsgenerally receive more reviews, but their ratings are not necessarily higher than those of businesses located further away. Additionally, cultural and nature-oriented attractions appear to be associated with more positive sentiments and higher ratings compared to other types of attractions. Most of the reviews are positive, and they become more positive as the user rating on that review increase.</p>
+<p>For the next step in the final project, we plan to implement tokenization, word cloud generation, and Latent Dirichlet Allocation (LDA) topic modeling, to identify common topics in reviews for businesses near different types of attractions. Predictive modeling techniques will also be applied to develop models that predict business success (high ratings, positive sentiment, high amount of reviews) based on location features, including proximity to tourist attractions. This could include regression models to predict ratings or classification models to predict sentiment categories.</p>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const onCopySuccess = function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  }
+  const getTextToCopy = function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button:not([data-in-quarto-modal])', {
+    text: getTextToCopy
+  });
+  clipboard.on('success', onCopySuccess);
+  if (window.document.getElementById('quarto-embedded-source-code-modal')) {
+    const clipboardModal = new window.ClipboardJS('.code-copy-button[data-in-quarto-modal]', {
+      text: getTextToCopy,
+      container: window.document.getElementById('quarto-embedded-source-code-modal')
+    });
+    clipboardModal.on('success', onCopySuccess);
+  }
+    var localhostRegex = new RegExp(/^(?:http|https):\/\/localhost\:?[0-9]*\//);
+    var mailtoRegex = new RegExp(/^mailto:/);
+      var filterRegex = new RegExp('/' + window.location.host + '/');
+    var isInternal = (href) => {
+        return filterRegex.test(href) || localhostRegex.test(href) || mailtoRegex.test(href);
+    }
+    // Inspect non-navigation links and adorn them if external
+ 	var links = window.document.querySelectorAll('a[href]:not(.nav-link):not(.navbar-brand):not(.toc-action):not(.sidebar-link):not(.sidebar-item-toggle):not(.pagination-link):not(.no-external):not([aria-hidden]):not(.dropdown-item):not(.quarto-navigation-tool):not(.about-link)');
+    for (var i=0; i<links.length; i++) {
+      const link = links[i];
+      if (!isInternal(link.href)) {
+        // undo the damage that might have been done by quarto-nav.js in the case of
+        // links that we want to consider external
+        if (link.dataset.originalHref !== undefined) {
+          link.href = link.dataset.originalHref;
+        }
+      }
+    }
+  function tippyHover(el, contentFn, onTriggerFn, onUntriggerFn) {
+    const config = {
+      allowHTML: true,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start',
+    };
+    if (contentFn) {
+      config.content = contentFn;
+    }
+    if (onTriggerFn) {
+      config.onTrigger = onTriggerFn;
+    }
+    if (onUntriggerFn) {
+      config.onUntrigger = onUntriggerFn;
+    }
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      if (note) {
+        return note.innerHTML;
+      } else {
+        return "";
+      }
+    });
+  }
+  const xrefs = window.document.querySelectorAll('a.quarto-xref');
+  const processXRef = (id, note) => {
+    // Strip column container classes
+    const stripColumnClz = (el) => {
+      el.classList.remove("page-full", "page-columns");
+      if (el.children) {
+        for (const child of el.children) {
+          stripColumnClz(child);
+        }
+      }
+    }
+    stripColumnClz(note)
+    if (id === null || id.startsWith('sec-')) {
+      // Special case sections, only their first couple elements
+      const container = document.createElement("div");
+      if (note.children && note.children.length > 2) {
+        container.appendChild(note.children[0].cloneNode(true));
+        for (let i = 1; i < note.children.length; i++) {
+          const child = note.children[i];
+          if (child.tagName === "P" && child.innerText === "") {
+            continue;
+          } else {
+            container.appendChild(child.cloneNode(true));
+            break;
+          }
+        }
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(container);
+        }
+        return container.innerHTML
+      } else {
+        if (window.Quarto?.typesetMath) {
+          window.Quarto.typesetMath(note);
+        }
+        return note.innerHTML;
+      }
+    } else {
+      // Remove any anchor links if they are present
+      const anchorLink = note.querySelector('a.anchorjs-link');
+      if (anchorLink) {
+        anchorLink.remove();
+      }
+      if (window.Quarto?.typesetMath) {
+        window.Quarto.typesetMath(note);
+      }
+      if (note.classList.contains("callout")) {
+        return note.outerHTML;
+      } else {
+        return note.innerHTML;
+      }
+    }
+  }
+  for (var i=0; i<xrefs.length; i++) {
+    const xref = xrefs[i];
+    tippyHover(xref, undefined, function(instance) {
+      instance.disable();
+      let url = xref.getAttribute('href');
+      let hash = undefined; 
+      if (url.startsWith('#')) {
+        hash = url;
+      } else {
+        try { hash = new URL(url).hash; } catch {}
+      }
+      if (hash) {
+        const id = hash.replace(/^#\/?/, "");
+        const note = window.document.getElementById(id);
+        if (note !== null) {
+          try {
+            const html = processXRef(id, note.cloneNode(true));
+            instance.setContent(html);
+          } finally {
+            instance.enable();
+            instance.show();
+          }
+        } else {
+          // See if we can fetch this
+          fetch(url.split('#')[0])
+          .then(res => res.text())
+          .then(html => {
+            const parser = new DOMParser();
+            const htmlDoc = parser.parseFromString(html, "text/html");
+            const note = htmlDoc.getElementById(id);
+            if (note !== null) {
+              const html = processXRef(id, note);
+              instance.setContent(html);
+            } 
+          }).finally(() => {
+            instance.enable();
+            instance.show();
+          });
+        }
+      } else {
+        // See if we can fetch a full url (with no hash to target)
+        // This is a special case and we should probably do some content thinning / targeting
+        fetch(url)
+        .then(res => res.text())
+        .then(html => {
+          const parser = new DOMParser();
+          const htmlDoc = parser.parseFromString(html, "text/html");
+          const note = htmlDoc.querySelector('main.content');
+          if (note !== null) {
+            // This should only happen for chapter cross references
+            // (since there is no id in the URL)
+            // remove the first header
+            if (note.children.length > 0 && note.children[0].tagName === "HEADER") {
+              note.children[0].remove();
+            }
+            const html = processXRef(null, note);
+            instance.setContent(html);
+          } 
+        }).finally(() => {
+          instance.enable();
+          instance.show();
+        });
+      }
+    }, function(instance) {
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            div.style.left = 0;
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+        // Handle positioning of the toggle
+    window.addEventListener(
+      "resize",
+      throttle(() => {
+        elRect = undefined;
+        if (selectedAnnoteEl) {
+          selectCodeLines(selectedAnnoteEl);
+        }
+      }, 10)
+    );
+    function throttle(fn, ms) {
+    let throttle = false;
+    let timer;
+      return (...args) => {
+        if(!throttle) { // first call gets through
+            fn.apply(this, args);
+            throttle = true;
+        } else { // all the others get throttled
+            if(timer) clearTimeout(timer); // cancel #2
+            timer = setTimeout(() => {
+              fn.apply(this, args);
+              timer = throttle = false;
+            }, ms);
+        }
+      };
+    }
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+
+</body></html>
