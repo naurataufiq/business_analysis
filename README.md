@@ -25,6 +25,3 @@ The main objectives of this project are:
 
 You can view the final report and visualizations here:  
 📄 [View the full report here](https://naurataufiq.github.io/business_analysis)
-
-## 📁 Repository Structure
-
