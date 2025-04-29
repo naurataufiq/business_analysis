@@ -1,0 +1,22 @@
+---
+title: "Exploring Yelp Toronto Businesses and Their
+Reviews in Relation to Nearby Attractions"
+output: 
+    html_document:
+        toc: TRUE
+        toc_float: TRUE
+---
+
+# Introduction
+
+Tourism plays a major role in shaping the economy of Toronto, Canada’s largest city and a popular tourist destination. The analysis leverages three datasets: Toronto’s Places of Interest and Attractions from the Toronto Open Data portal, and Yelp Business and Review datasets from Kaggle (sourced from the Yelp Open Dataset), filtered to include only Toronto-based businesses and their reviews.
+
+In this project, I explore the relationship between **Toronto Yelp businesses**, their reviews, and their proximity to **local attractions**, by interactive exploratory data analysis [(EDA)](index.html) and producing predictive modelling using machine learning models [(Models)](model.html). This study builds upon the spatial and sentiment analysis of Toronto businesses by developing predictive models to understand what factors influence Yelp business ratings. After exploring how tourist attractions affect nearby businesses and examining sentiment patterns across reviews, I now aim to determine whether these factors can predict business performance. Using machine learning techniques, I explore whether a combination of review sentiment, user engagement metrics, and proximity to tourist attractions can effectively forecast how customers rate businesses on Yelp's five-star scale. 
+
+The models developed in this analysis could provide valuable insights for business owners considering location strategies, current businesses looking to improve their ratings, and city planners interested in maximizing the tourism-business relationship across Toronto. By quantifying the relationship between these various factors and business ratings, this project seeks to offer concrete recommendations that could enhance business success in Toronto's competitive marketplace, particularly in relation to the city's thriving tourism industry.
+
+# Methods
+
+The data for this project was sourced from the Toronto Open Data API (for "Places of Interest and Toronto Attractions") and Kaggle's Yelp Open Dataset. Initial preprocessing involved removing duplicates from all datasets, with special attention to the business dataset which contained 356 duplicate entries (likely due to information updates). The data was filtered to include only Toronto businesses by validating geographical coordinates (latitude: 43.5-43.9, longitude: -79.6-79.2), and correcting inconsistent state codes. Business and attraction datasets were merged using a KDTree spatial index to identify the nearest attraction for each business and calculate the distance between them. Review text underwent sentiment analysis using VADER (Valence Aware Dictionary and sEntiment Reasoner) from the nltk library, producing compound scores that were categorized as positive (>0.05), neutral (-0.05 to 0.05), or negative (<-0.05). These sentiment labels, along with user engagement metrics (useful/funny/cool), were incorporated as features for the predictive models.
+
+Two machine learning algorithms were implemented to predict business ratings: XGBoost and Random Forest. XGBoost, a gradient boosting framework, builds sequential decision trees where each tree corrects errors made by previous trees, while Random Forest creates an ensemble of diverse trees trained on random data subsets. Both models were evaluated on two classification tasks: a three-class approach (predicting ratings as "low" (<3), "medium" (=3), or "high" (>3)) and a simplified binary classification (just "low" (<3) or "high" (≥3)). Data was split into training (80%) and testing (20%) sets using createDataPartition() with a fixed random seed (42) for reproducibility. Categorical features underwent one-hot encoding using dummyVars() before training. The best performing model was XGBoost with compound_score, useful, funny, cool, and nearest_attraction_category features, achieving 71.65% test accuracy on the multi-class task and 86.28% on binary classification. This demonstrates that the combination of sentiment data, user engagement metrics, and location context provides the strongest signal for predicting Yelp business ratings.

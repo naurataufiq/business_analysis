@@ -1,0 +1,201 @@
+---
+title: "Exploratory Data Analysis"
+output: 
+    html_document:
+        toc: TRUE
+        toc_float: TRUE
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, warning=FALSE, message=FALSE)
+```
+
+```{r include=FALSE, warning=FALSE, echo=FALSE}
+library(readr)
+business <- read_csv("data/business_tor_cleaned.csv")
+reviews <- read_csv("data/reviews_tor_final.csv")
+merged <- read_csv("data/merged_data.csv")
+
+head(business)
+head(reviews)
+head(merged)
+```
+
+```{r include=FALSE, echo=FALSE}
+summary(business)
+```
+
+```{r include=FALSE, echo=FALSE}
+summary(reviews)
+```
+
+```{r include=FALSE, echo=FALSE}
+summary(merged)
+```
+
+```{r include=FALSE, warning=FALSE, echo=FALSE}
+### INTERACTIVE VIS ###
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(leaflet)
+library(DT)
+```
+
+## Map of Businesses in Toronto
+
+The map below displays Yelp-listed businesses in Toronto, with circle colors indicating their average ratings. Warmer colors (~red) represent lower-rated businesses, while cooler colors (~green) indicate higher-rated ones. Each circle can be clicked to reveal the business name, category, rating, and the nearest tourist attraction.
+
+```{r warning=FALSE, echo=FALSE}
+leaflet(data = business) %>%
+  addTiles() %>%
+  addCircleMarkers(
+    ~longitude, ~latitude,
+    popup = ~paste0("<strong>", name, "</strong><br>",
+                    "Rating: ", avg_rating, "<br>",
+                    "Category: ", categories, "<br>",
+                    "Attraction: ", nearest_attraction_name, " (", nearest_attraction_category, ")"),
+    radius = 6,
+    color = ~colorNumeric(palette = "RdYlGn", domain = c(1, 5))(avg_rating),  # Color by rating
+    stroke = FALSE,
+    fillOpacity = 0.7
+  ) %>%
+  addLegend(position = "bottomright", pal = colorNumeric(palette = "RdYlGn", domain = c(1, 5)), values = business$avg_rating, title = "Rating", opacity = 1)
+```
+We can see that at glance, there's no specific areas that might have most low-rated businesses, and vice-versa; Toronto businesses look well distributed. We can, however, explore deeply on how some areas might have more higher-rated businesses concentration, which might be because of specific tourist attraction category, or something else. Some areas might also have more specific category businesses, for example around Art Gallery of Ontario, there's a lot of food businesses (including cafés, restaurants, etc.)
+
+## Review Counts by Business Proximity
+
+The boxplot below compares the number of Yelp reviews between businesses located within 1 km of a tourist attraction (Near Attraction) and those in other areas (Regular Neighborhood). Each point represents a business, and the spread shows the variability in review counts.
+
+```{r warning=FALSE, echo=FALSE}
+box_data <- business %>%
+  mutate(Proximity = ifelse(distance_km <= 1, "Near Attraction", "Regular Neighborhood"))
+
+p1 <- plot_ly(box_data, 
+              y = ~review_count, 
+              color = ~Proximity, 
+              colors = c("Near Attraction" = "mediumseagreen", "Regular Neighborhood" = "indianred"),
+              type = "box",
+              boxpoints = "all", 
+              jitter = 0.3,
+              pointpos = -1.8,
+              text = ~paste("Business:", name, "<br>Reviews:", review_count),  # Custom hover text
+              hoverinfo = "text") %>%
+  layout(title = "Review Count by Business Proximity",
+         yaxis = list(title = "Review Count"))
+
+p1
+```
+
+From the visualization, we can observe that businesses near attractions generally receive more reviews, which may suggest higher visibility or foot traffic due to tourism. This supports the idea that proximity to popular sites could positively influence customer engagement online.
+
+
+## Sentiment Counts 
+
+This bar chart shows the distribution of sentiment labels in business reviews. Hovering over each bar reveals the total number of reviews as well as the percentage each sentiment makes up out of the total.
+
+```{r warning=FALSE, echo=FALSE}
+# Your data
+sentiment_counts <- data.frame(
+  Sentiment = c("Positive", "Neutral", "Negative"),
+  Count = c(373503, 5669, 52097)
+)
+
+# Add percentage column
+sentiment_counts <- sentiment_counts %>%
+  mutate(Percentage = round(Count / sum(Count) * 100, 2))
+
+# Hover text with both count and percentage
+sentiment_counts$HoverText <- paste0(
+  sentiment_counts$Sentiment, "<br>",
+  "Count: ", sentiment_counts$Count, "<br>",
+  "Percentage: ", sentiment_counts$Percentage, "%"
+)
+p3 <- plot_ly(
+  sentiment_counts,
+  x = ~Sentiment,
+  y = ~Count,
+  type = "bar",
+  text = ~HoverText,
+  hoverinfo = "text",
+  textposition = "none",  # Hide bar labels
+  marker = list(color = c("mediumseagreen", "khaki", "indianred"))
+) %>%
+  layout(
+    title = "Sentiment Distribution of Reviews",
+    yaxis = list(title = "Number of Reviews")
+  )
+
+p3
+
+```
+We can see that positive sentiment dominates, making up around 86% of all reviews, while negative and neutral sentiments account for a much smaller portion. This provides a quick glance at how customers generally feel about Toronto businesses.
+
+
+## Rating by Sentiment
+
+These boxplots show the distribution of rating based on their sentiment score. 
+
+```{r echo=FALSE}
+library(ggplot2)
+library(plotly)
+
+# Base ggplot boxplot
+p <- ggplot(reviews, aes(x = factor(rating), y = compound_score, fill = rating)) +
+  geom_boxplot() +
+  scale_fill_distiller(palette = "RdYlGn", direction = 1) +
+  labs(
+    x = "Rating (Stars)",
+    y = "Sentiment Compound Score"
+  ) +
+  theme_minimal(base_size = 12)
+
+# Make it interactive
+ggplotly(p)
+```
+
+Notice that as star ratings increase from 1 to 5, sentiment scores generally become more positive and less variable, as expected. One-star ratings mostly show negative sentiment, while five-star ratings consistently show high positive sentiment. Interestingly, even 3-star ratings have a generally positive sentiment median despite being considered “average” ratings, though they have notable negative outliers, so this matched with our finding above that the reviews tend to skew positively.
+
+
+## Word Clouds by Sentiment 
+
+This interactive word cloud shows the 50 most frequently used words in Toronto business reviews that are labeled positive (excluding some common and unuseful stopwords, like "the", "and" or "toronto", etc.). Hovering over each word reveals how often it appears, giving a quick and fun way to explore the most common themes and experiences mentioned by customers who gave positive reviews. 
+
+```{r include=FALSE, echo=FALSE}
+# install.packages("wordcloud2")
+```
+
+```{r positive-cloud, echo=FALSE, warning=FALSE, message=FALSE}
+library(dplyr)
+library(tidytext)
+library(wordcloud2)
+library(stringr)
+library(RColorBrewer)
+
+data("stop_words")
+
+# Custom stopwords
+custom_stopwords <- tibble(word = c("food", "restaurant", "people", "staff", "toronto", "ive", "im", "didnt", "dont", "wasnt", "youre"))
+all_stopwords <- bind_rows(stop_words, custom_stopwords)
+
+# Cleaning function
+clean_reviews <- function(data, sentiment_value) {
+  data %>%
+    filter(sentiment_label == sentiment_value, !is.na(review_text)) %>%
+    unnest_tokens(word, review_text) %>%
+    mutate(word = str_remove_all(word, "[0-9]")) %>%
+    mutate(word = str_replace_all(word, "[^a-zA-Z]", "")) %>%
+    filter(str_detect(word, "^[a-zA-Z]+$")) %>%
+    anti_join(all_stopwords, by = "word") %>%
+    count(word, sort = TRUE) %>%
+    slice_max(n, n = 50)
+}
+top_positive <- clean_reviews(merged, "positive")
+rdylgn_colors <- brewer.pal(11, "RdYlGn")
+color_vector <- rep(rdylgn_colors, length.out = nrow(top_positive)) 
+w1 <- wordcloud2(data = top_positive, size = 1, color = color_vector, backgroundColor = "white")
+w1
+```
+
+Notice how many words are food-related, making it seemed like food businesses may either have high positive reviews or just high quantity in general than other type of businesses (this seems the most likely). Most words are also positive in connotation, for example “delicious” and “fresh”, indicating good quality of food businesses, and “friendly” might indicate the positive service by staff.

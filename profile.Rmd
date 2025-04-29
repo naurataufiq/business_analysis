@@ -1,0 +1,32 @@
+---
+output: html_document
+---
+
+## Author
+Naura Taufiq is an undergraduate student studying Data Science at the University of Toronto. Her interests lie in statistical modeling, data storytelling, and applying machine learning to real-world contexts like consumer behavior and review sentiment.
+
+## Acknowledgements
+This website is created as a final deliverable for JSC370 (Statistical Data Science), Winter 2024, at the University of Toronto.
+I would like to express my sincere gratitude to [Dr. Meredith Franklin](http://meredithfranklin.github.io/) in the Department of Statistical Sciences for her guidance, insightful feedback, and encouragement throughout this project. Her expertise helped shape this work into a complete analysis.
+
+## References
+1. Yelp Academic Dataset – Used as the main data source. Available from Yelp's open dataset initiative.
+
+2. VADER Sentiment Analysis Tool – Hutto, C.J. & Gilbert, E.E. (2014). VADER: A Parsimonious Rule-based Model for Sentiment Analysis of Social Media Text.
+
+3. Ambarish Kumar (2022) – "A very extensive data analysis of Yelp" on Kaggle. [Available here.](https://www.kaggle.com/code/ambarish/a-very-extensive-data-analysis-of-yelp) This notebook inspired parts of my data cleaning and exploratory visualization.
+
+## R Packages and Documentation
+
+1. tidyverse – Wickham, H. et al. (2019). [Welcome to the Tidyverse.](https://www.tidyverse.org/)
+
+2. randomForest – Liaw, A. and Wiener, M. (2002). [Classification and Regression by randomForest.](https://cran.r-project.org/web/packages/randomForest/)
+
+3. xgboost – Chen, T., & Guestrin, C. (2016). [XGBoost: A Scalable Tree Boosting System.](https://xgboost.readthedocs.io/)
+
+4. vaderSentiment – For sentiment analysis in R. Wrapper around the Python module using reticulate.
+
+5. leaflet, sf, geosphere – For spatial data wrangling and visualizations.
+
+6. Stack Overflow and RStudio Community – For occasional bug fixes and syntax sanity checks.
+

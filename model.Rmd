@@ -1,0 +1,219 @@
+---
+title: "Models Summary"
+output: 
+    html_document:
+        toc: TRUE
+        toc_float: TRUE
+---
+
+## Introduction
+I developed machine learning models to predict business ratings based on Yelp review data. I explored two different prediction approaches:
+
+1. Multi-class Classification: Predicting ratings as "low" (< 3), "medium" (= 3), or "high" (> 3)
+
+2. Binary Classification: Simplifying to just "low" (< 3) or "high" (>= 3) by removing the "medium" category
+
+For each approach, I tested two different machine learning algorithms:
+
+**XGBoost (XGB):** A powerful gradient boosting algorithm known for its performance in structured data problems. XGBoost uses decision trees in sequence, with each new tree correcting errors made by previous trees. It's particularly effective with mixed data types and handles non-linear relationships well. Click [here](https://en.wikipedia.org/wiki/XGBoost) to learn more about XGB.
+
+**Random Forest (RF):** An ensemble method that builds multiple decision trees and merges their predictions. Random Forest works by creating diverse trees trained on random subsets of data and features, making it robust against overfitting and effective on varied data types. Click [here](https://en.wikipedia.org/wiki/Random_forest) to learn more about RF.
+
+## Implementation
+The analysis utilized several key R packages, including caret for model training and evaluation and xgboost and randomForest for the modeling algorithms. Data was split into training (80%) and testing (20%) sets using createDataPartition() with a fixed random seed (42) to ensure reproducibility. For categorical variables, one-hot encoding was applied using dummyVars() before training.
+
+**Feature Descriptions:**
+
+sentiment_label: Categorical sentiment classification of review text
+
+compound_score: Numerical sentiment score derived from review text analysis
+
+useful, funny, cool: User engagement metrics for reviews
+
+nearest_attraction_category: Category of the closest tourist attraction to the business
+
+```{r eval=FALSE, include=FALSE, warning=FALSE, echo=FALSE}
+# === IMPORTS ===
+library(readr)
+library(dplyr)
+library(caret)
+library(xgboost)
+library(randomForest)
+library(forcats)
+
+# === LOAD DATA ===
+merged <- read_csv("data/merged_data.csv")
+
+# === CREATE TARGET: Classification (low, medium, high, (or without the medium)) ===
+merged <- merged %>%
+  mutate(rating_label = case_when(
+    rating < 3 ~ "low",
+    # rating == 3 ~ "medium",
+    rating >= 3 ~ "high"
+  )) %>%
+  mutate(rating_label = as.factor(rating_label))
+
+# === REMOVE NA ===
+merged <- merged %>%
+  filter(!is.na(rating_label), !is.na(compound_score), !is.na(nearest_attraction_category))
+
+# === SPLIT DATA ===
+set.seed(42)
+train_index <- createDataPartition(merged$rating_label, p = 0.8, list = FALSE)
+train_data <- merged[train_index, ]
+test_data <- merged[-train_index, ]
+
+# === HELPER FUNCTION TO RUN MODEL ===
+run_model <- function(train_data, test_data, features, model_type = "xgb") {
+  train_x <- train_data[, features]
+  test_x <- test_data[, features]
+  
+  # One-hot encode categorical vars
+  dummies_model <- dummyVars(~ ., data = train_x)
+  train_x_mat <- predict(dummies_model, train_x)
+  test_x_mat <- predict(dummies_model, test_x)
+  
+  train_y <- train_data$rating_label
+  test_y <- test_data$rating_label
+  
+  if (model_type == "xgb") {
+    # Convert to matrix
+    dtrain <- xgb.DMatrix(data = train_x_mat, label = as.numeric(train_y) - 1)
+    dtest <- xgb.DMatrix(data = test_x_mat, label = as.numeric(test_y) - 1)
+    
+    # Train
+    xgb_model <- xgboost(
+      data = dtrain,
+      nrounds = 150,
+      max_depth = 6,
+      eta = 0.1,
+      subsample = 0.8,
+      colsample_bytree = 0.8,
+      objective = "multi:softmax",
+      num_class = length(levels(train_y)),
+      verbose = 0
+    )
+    
+    # Predict on test data
+    test_preds <- predict(xgb_model, dtest)
+    test_preds <- factor(test_preds, levels = 0:(length(levels(train_y))-1), labels = levels(train_y))
+    
+    # Predict on training data
+    train_preds <- predict(xgb_model, dtrain)
+    train_preds <- factor(train_preds, levels = 0:(length(levels(train_y))-1), labels = levels(train_y))
+    
+  } else if (model_type == "rf") {
+    rf_model <- randomForest(x = train_x_mat, y = train_y, ntree = 200)
+    
+    # Predict on test data
+    test_preds <- predict(rf_model, newdata = test_x_mat)
+    
+    # Predict on training data
+    train_preds <- predict(rf_model, newdata = train_x_mat)
+  }
+  
+  # Calculate accuracies
+  train_acc <- mean(train_preds == train_y)
+  test_acc <- mean(test_preds == test_y)
+  
+  cat("Model Type:", model_type, "| Features:", paste(features, collapse = ", "), "\n")
+  cat("Training Accuracy:", round(train_acc * 100, 2), "%\n")
+  cat("Test Accuracy:", round(test_acc * 100, 2), "%\n")
+  print(confusionMatrix(test_preds, test_y))
+  cat("\n")
+  
+  # Return the model if needed
+  if (model_type == "xgb") {
+    return(xgb_model)
+  } else if (model_type == "rf") {
+    return(rf_model)
+  }
+}
+
+
+# === MODEL COMPARISONS ===
+
+# 1. XGBoost with sentiment_label + nearest
+run_model(train_data, test_data, features = c("sentiment_label", "nearest_attraction_category"), model_type = "xgb")
+
+# 2. XGBoost with compound_score + nearest
+run_model(train_data, test_data, features = c("compound_score", "nearest_attraction_category"), model_type = "xgb")
+
+# 3. XGBoost with compound_score + useful + funny + cool + nearest
+run_model(train_data, test_data, features = c("compound_score", "useful", "funny", "cool", "nearest_attraction_category"), model_type = "xgb")
+
+# 4. Random Forest with compound_score + nearest
+run_model(train_data, test_data, features = c("compound_score", "nearest_attraction_category"), model_type = "rf")
+
+# 5. Random Forest with all features
+run_model(train_data, test_data, features = c("compound_score", "useful", "funny", "cool", "nearest_attraction_category", "sentiment_label"), model_type = "rf")
+```
+```{r}
+library(ggplot2)
+library(xgboost)
+install.packages("Ckmeans.1d.dp")
+library(Ckmeans.1d.dp)  # for xgb.importance to work properly with plotting
+
+# Model 2: compound_score + nearest_attraction_category
+model2 <- run_model(train_data, test_data, features = c("compound_score", "nearest_attraction_category"), model_type = "xgb")
+
+
+# Model 3: compound_score, useful, funny, cool, nearest
+model3 <- run_model(train_data, test_data,
+                    features = c("compound_score", "useful", "funny", "cool", "nearest_attraction_category"),
+                    model_type = "xgb")
+
+# Get feature importance
+importance3 <- xgb.importance(model = model3)
+
+# Plot
+ggplot(importance3, aes(x = reorder(Feature, Gain), y = Gain)) +
+  geom_bar(stat = "identity", fill = "indianred") +
+  coord_flip() +
+  labs(title = "Feature Importance: Model 3 (XGBoost)",
+       x = "Feature",
+       y = "Gain") +
+  theme_minimal()
+```
+
+The following table shows the features, training accuracy, and test accuracy of all the trained models. Click on the name of a model to see a detailed analysis of that model.
+
+Table: Model Performance Comparison
+
+| Model | Features | Training Accuracy | Test Accuracy | Training Accuracy 2 (without Medium) | Test Accuracy 2 (without Medium) |
+|-------|----------|-------------------|---------------|--------------------------------------|----------------------------------|
+| XGBoost 1 | sentiment_label, nearest_attraction_category | 70.10% | 70.18% | 85.56% | 85.57% |
+| **XGBoost 2** | **compound_score, nearest_attraction_category** | 70.98% | 70.91% | **85.74%** | **85.66%** |
+| **XGBoost 3** | **compound_score, useful, funny, cool, nearest_attraction_category** | **71.77%** | **71.65%** | 86.52% | 86.28% |
+| Random Forest 1 | compound_score, nearest_attraction_category | 70.76% | 70.76% | -  | - |
+| Random Forest 2 | compound_score, useful, funny, cool, nearest_attraction_category, sentiment_label | 71.76% | 71.38% | - | - |
+
+
+### XGBoost 1
+This baseline model uses only sentiment labels and the nearest attraction category as features. It achieves moderate accuracy (70.18%) for three-class prediction. When simplified to binary classification, accuracy improves significantly to 85.57%, suggesting the medium class was difficult to predict.
+
+### XGBoost 2  
+By replacing the categorical sentiment label with the numerical compound sentiment score, this model shows a slight improvement in the three-class task (70.91%) and binary task (85.66%). This suggests that the continuous sentiment score provides more nuanced information than the categorical label.
+
+### XGBoost 3 
+Adding user engagement features (useful, funny, cool ratings) alongside compound score and nearest attraction leads to our best-performing model for both classification approaches (71.65% and 86.28% respectively). This demonstrates that user engagement metrics contain valuable signal for predicting business ratings.
+
+### Random Forest 1
+Using compound score and nearest attraction category, this model performs similarly to XGBoost 2 for the three-class problem (70.76%). The consistent performance across different algorithms confirms these features are robust predictors.
+
+### Random Forest 2
+Our most feature-rich model incorporates sentiment data (both compound score and sentiment label) with user engagement metrics and location information. While it performs well (71.38%), it doesn't significantly outperform XGBoost 3 despite using more features, suggesting potential feature redundancy.
+
+## Conclusion
+
+Key findings include:
+
+- **XGBoost 3** is the top performer in the **multi-class** classification task, achieving the highest test accuracy (71.65%). Its success is driven by the inclusion of user engagement features (`useful`, `funny`, `cool`) alongside sentiment and location data.
+- **XGBoost 2**, which uses `compound_score` and `nearest_attraction_category`, outperforms other models in the **binary classification** task (test accuracy: 85.66%). This highlights the value of continuous sentiment scores in distinguishing between “low” and “high” ratings.
+- Across all models, the **binary classification task consistently yields higher accuracy (~15 percentage points more)** than the multi-class task. This suggests that businesses with a rating of exactly 3 (“medium”) are harder to categorize and introduce ambiguity into the model.
+- Removing the “medium” class simplified the task and resulted in stronger performance, which can be useful in applications where only a positive vs. negative classification is needed.
+- User engagement features and location context (such as the nearest tourist attraction category) proved valuable, especially when combined with sentiment data.
+- Both **XGBoost** and **Random Forest** performed comparably, though XGBoost generally had a slight edge—especially in handling nuanced feature interactions.
+
+Overall, this analysis shows that a combination of **sentiment analysis**, **engagement metrics**, and **location-based features** offers the strongest predictive signal for Yelp business ratings. Depending on the application, choosing between a nuanced multi-class model and a simpler, more accurate binary model can be informed by this trade-off.
+

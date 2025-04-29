@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+
+
+
+<title>Models Summary</title>
+
+<script src="site_libs/header-attrs-2.29/header-attrs.js"></script>
+<script src="site_libs/jquery-3.6.0/jquery-3.6.0.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="site_libs/bootstrap-3.3.5/css/cosmo.min.css" rel="stylesheet" />
+<script src="site_libs/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="site_libs/bootstrap-3.3.5/shim/respond.min.js"></script>
+<style>h1 {font-size: 34px;}
+       h1.title {font-size: 38px;}
+       h2 {font-size: 30px;}
+       h3 {font-size: 24px;}
+       h4 {font-size: 18px;}
+       h5 {font-size: 16px;}
+       h6 {font-size: 12px;}
+       code {color: inherit; background-color: rgba(0, 0, 0, 0.04);}
+       pre:not([class]) { background-color: white }</style>
+<script src="site_libs/jqueryui-1.13.2/jquery-ui.min.js"></script>
+<link href="site_libs/tocify-1.9.1/jquery.tocify.css" rel="stylesheet" />
+<script src="site_libs/tocify-1.9.1/jquery.tocify.js"></script>
+<script src="site_libs/navigation-1.1/tabsets.js"></script>
+<link href="site_libs/highlightjs-9.12.0/default.css" rel="stylesheet" />
+<script src="site_libs/highlightjs-9.12.0/highlight.js"></script>
+<link href="site_libs/font-awesome-6.5.2/css/all.min.css" rel="stylesheet" />
+<link href="site_libs/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet" />
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
+<style type="text/css">code{white-space: pre;}</style>
+<script type="text/javascript">
+if (window.hljs) {
+  hljs.configure({languages: []});
+  hljs.initHighlightingOnLoad();
+  if (document.readyState && document.readyState === "complete") {
+    window.setTimeout(function() { hljs.initHighlighting(); }, 0);
+  }
+}
+</script>
+
+
+
+
+
+
+<link rel="stylesheet" href="styles.css" type="text/css" />
+
+
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+img {
+  max-width:100%;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+.html-widget {
+  margin-bottom: 20px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+summary {
+  display: list-item;
+}
+details > summary > p:only-child {
+  display: inline;
+}
+pre code {
+  padding: 0;
+}
+</style>
+
+
+<style type="text/css">
+.dropdown-submenu {
+  position: relative;
+}
+.dropdown-submenu>.dropdown-menu {
+  top: 0;
+  left: 100%;
+  margin-top: -6px;
+  margin-left: -1px;
+  border-radius: 0 6px 6px 6px;
+}
+.dropdown-submenu:hover>.dropdown-menu {
+  display: block;
+}
+.dropdown-submenu>a:after {
+  display: block;
+  content: " ";
+  float: right;
+  width: 0;
+  height: 0;
+  border-color: transparent;
+  border-style: solid;
+  border-width: 5px 0 5px 5px;
+  border-left-color: #cccccc;
+  margin-top: 5px;
+  margin-right: -10px;
+}
+.dropdown-submenu:hover>a:after {
+  border-left-color: #adb5bd;
+}
+.dropdown-submenu.pull-left {
+  float: none;
+}
+.dropdown-submenu.pull-left>.dropdown-menu {
+  left: -100%;
+  margin-left: 10px;
+  border-radius: 6px 0 6px 6px;
+}
+</style>
+
+<script type="text/javascript">
+// manage active state of menu based on current page
+$(document).ready(function () {
+  // active menu anchor
+  href = window.location.pathname
+  href = href.substr(href.lastIndexOf('/') + 1)
+  if (href === "")
+    href = "index.html";
+  var menuAnchor = $('a[href="' + href + '"]');
+
+  // mark the anchor link active (and if it's in a dropdown, also mark that active)
+  var dropdown = menuAnchor.closest('li.dropdown');
+  if (window.bootstrap) { // Bootstrap 4+
+    menuAnchor.addClass('active');
+    dropdown.find('> .dropdown-toggle').addClass('active');
+  } else { // Bootstrap 3
+    menuAnchor.parent().addClass('active');
+    dropdown.addClass('active');
+  }
+
+  // Navbar adjustments
+  var navHeight = $(".navbar").first().height() + 15;
+  var style = document.createElement('style');
+  var pt = "padding-top: " + navHeight + "px; ";
+  var mt = "margin-top: -" + navHeight + "px; ";
+  var css = "";
+  // offset scroll position for anchor links (for fixed navbar)
+  for (var i = 1; i <= 6; i++) {
+    css += ".section h" + i + "{ " + pt + mt + "}\n";
+  }
+  style.innerHTML = "body {" + pt + "padding-bottom: 40px; }\n" + css;
+  document.head.appendChild(style);
+});
+</script>
+
+<!-- tabsets -->
+
+<style type="text/css">
+.tabset-dropdown > .nav-tabs {
+  display: inline-table;
+  max-height: 500px;
+  min-height: 44px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.tabset-dropdown > .nav-tabs > li.active:before, .tabset-dropdown > .nav-tabs.nav-tabs-open:before {
+  content: "\e259";
+  font-family: 'Glyphicons Halflings';
+  display: inline-block;
+  padding: 10px;
+  border-right: 1px solid #ddd;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li.active:before {
+  content: "\e258";
+  font-family: 'Glyphicons Halflings';
+  border: none;
+}
+
+.tabset-dropdown > .nav-tabs > li.active {
+  display: block;
+}
+
+.tabset-dropdown > .nav-tabs > li > a,
+.tabset-dropdown > .nav-tabs > li > a:focus,
+.tabset-dropdown > .nav-tabs > li > a:hover {
+  border: none;
+  display: inline-block;
+  border-radius: 4px;
+  background-color: transparent;
+}
+
+.tabset-dropdown > .nav-tabs.nav-tabs-open > li {
+  display: block;
+  float: none;
+}
+
+.tabset-dropdown > .nav-tabs > li {
+  display: none;
+}
+</style>
+
+<!-- code folding -->
+
+
+
+<style type="text/css">
+
+#TOC {
+  margin: 25px 0px 20px 0px;
+}
+@media (max-width: 768px) {
+#TOC {
+  position: relative;
+  width: 100%;
+}
+}
+
+@media print {
+.toc-content {
+  /* see https://github.com/w3c/csswg-drafts/issues/4434 */
+  float: right;
+}
+}
+
+.toc-content {
+  padding-left: 30px;
+  padding-right: 40px;
+}
+
+div.main-container {
+  max-width: 1200px;
+}
+
+div.tocify {
+  width: 20%;
+  max-width: 260px;
+  max-height: 85%;
+}
+
+@media (min-width: 768px) and (max-width: 991px) {
+  div.tocify {
+    width: 25%;
+  }
+}
+
+@media (max-width: 767px) {
+  div.tocify {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.tocify ul, .tocify li {
+  line-height: 20px;
+}
+
+.tocify-subheader .tocify-item {
+  font-size: 0.90em;
+}
+
+.tocify .list-group-item {
+  border-radius: 0px;
+}
+
+
+</style>
+
+
+
+</head>
+
+<body>
+
+
+<div class="container-fluid main-container">
+
+
+<!-- setup 3col/9col grid for toc_float and main content  -->
+<div class="row">
+<div class="col-xs-12 col-sm-4 col-md-3">
+<div id="TOC" class="tocify">
+</div>
+</div>
+
+<div class="toc-content col-xs-12 col-sm-8 col-md-9">
+
+
+
+
+<div class="navbar navbar-default  navbar-fixed-top" role="navigation">
+  <div class="container">
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbar" data-bs-target="#navbar">
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="index.html">Business Analysis</a>
+    </div>
+    <div id="navbar" class="navbar-collapse collapse">
+      <ul class="nav navbar-nav">
+        <li>
+  <a href="home.html">Home</a>
+</li>
+<li>
+  <a href="index.html">EDA</a>
+</li>
+<li>
+  <a href="model.html">Models</a>
+</li>
+      </ul>
+      <ul class="nav navbar-nav navbar-right">
+        <li>
+  <a href="profile.html">Profile</a>
+</li>
+<li>
+  <a href="https://github.com/naurataufiq/business-analysis">
+    <span class="fa fa-github fa-lg"></span>
+     
+  </a>
+</li>
+      </ul>
+    </div><!--/.nav-collapse -->
+  </div><!--/.container -->
+</div><!--/.navbar -->
+
+<div id="header">
+
+
+
+<h1 class="title toc-ignore">Models Summary</h1>
+
+</div>
+
+
+<div id="introduction" class="section level2">
+<h2>Introduction</h2>
+<p>I developed machine learning models to predict business ratings based
+on Yelp review data. I explored two different prediction approaches:</p>
+<ol style="list-style-type: decimal">
+<li><p>Multi-class Classification: Predicting ratings as “low” (&lt; 3),
+“medium” (= 3), or “high” (&gt; 3)</p></li>
+<li><p>Binary Classification: Simplifying to just “low” (&lt; 3) or
+“high” (&gt;= 3) by removing the “medium” category</p></li>
+</ol>
+<p>For each approach, I tested two different machine learning
+algorithms:</p>
+<p><strong>XGBoost (XGB):</strong> A powerful gradient boosting
+algorithm known for its performance in structured data problems. XGBoost
+uses decision trees in sequence, with each new tree correcting errors
+made by previous trees. It’s particularly effective with mixed data
+types and handles non-linear relationships well. Click <a
+href="https://en.wikipedia.org/wiki/XGBoost">here</a> to learn more
+about XGB.</p>
+<p><strong>Random Forest (RF):</strong> An ensemble method that builds
+multiple decision trees and merges their predictions. Random Forest
+works by creating diverse trees trained on random subsets of data and
+features, making it robust against overfitting and effective on varied
+data types. Click <a
+href="https://en.wikipedia.org/wiki/Random_forest">here</a> to learn
+more about RF.</p>
+</div>
+<div id="implementation" class="section level2">
+<h2>Implementation</h2>
+<p>The analysis utilized several key R packages, including caret for
+model training and evaluation and xgboost and randomForest for the
+modeling algorithms. Data was split into training (80%) and testing
+(20%) sets using createDataPartition() with a fixed random seed (42) to
+ensure reproducibility. For categorical variables, one-hot encoding was
+applied using dummyVars() before training.</p>
+<p><strong>Feature Descriptions:</strong></p>
+<p>sentiment_label: Categorical sentiment classification of review
+text</p>
+<p>compound_score: Numerical sentiment score derived from review text
+analysis</p>
+<p>useful, funny, cool: User engagement metrics for reviews</p>
+<p>nearest_attraction_category: Category of the closest tourist
+attraction to the business</p>
+<p>The following table shows the features, training accuracy, and test
+accuracy of all the trained models. Click on the name of a model to see
+a detailed analysis of that model.</p>
+<table>
+<caption>Model Performance Comparison</caption>
+<colgroup>
+<col width="5%" />
+<col width="8%" />
+<col width="15%" />
+<col width="12%" />
+<col width="30%" />
+<col width="27%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Model</th>
+<th>Features</th>
+<th>Training Accuracy</th>
+<th>Test Accuracy</th>
+<th>Training Accuracy 2 (without Medium)</th>
+<th>Test Accuracy 2 (without Medium)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>XGBoost 1</td>
+<td>sentiment_label, nearest_attraction_category</td>
+<td>70.10%</td>
+<td>70.18%</td>
+<td>85.56%</td>
+<td>85.57%</td>
+</tr>
+<tr class="even">
+<td><strong>XGBoost 2</strong></td>
+<td><strong>compound_score, nearest_attraction_category</strong></td>
+<td>70.98%</td>
+<td>70.91%</td>
+<td><strong>85.74%</strong></td>
+<td><strong>85.66%</strong></td>
+</tr>
+<tr class="odd">
+<td><strong>XGBoost 3</strong></td>
+<td><strong>compound_score, useful, funny, cool,
+nearest_attraction_category</strong></td>
+<td><strong>71.77%</strong></td>
+<td><strong>71.65%</strong></td>
+<td>86.52%</td>
+<td>86.28%</td>
+</tr>
+<tr class="even">
+<td>Random Forest 1</td>
+<td>compound_score, nearest_attraction_category</td>
+<td>70.76%</td>
+<td>70.76%</td>
+<td>-</td>
+<td>-</td>
+</tr>
+<tr class="odd">
+<td>Random Forest 2</td>
+<td>compound_score, useful, funny, cool, nearest_attraction_category,
+sentiment_label</td>
+<td>71.76%</td>
+<td>71.38%</td>
+<td>-</td>
+<td>-</td>
+</tr>
+</tbody>
+</table>
+<div id="xgboost-1" class="section level3">
+<h3>XGBoost 1</h3>
+<p>This baseline model uses only sentiment labels and the nearest
+attraction category as features. It achieves moderate accuracy (70.18%)
+for three-class prediction. When simplified to binary classification,
+accuracy improves significantly to 85.57%, suggesting the medium class
+was difficult to predict.</p>
+</div>
+<div id="xgboost-2" class="section level3">
+<h3>XGBoost 2</h3>
+<p>By replacing the categorical sentiment label with the numerical
+compound sentiment score, this model shows a slight improvement in the
+three-class task (70.91%) and binary task (85.66%). This suggests that
+the continuous sentiment score provides more nuanced information than
+the categorical label.</p>
+</div>
+<div id="xgboost-3" class="section level3">
+<h3>XGBoost 3</h3>
+<p>Adding user engagement features (useful, funny, cool ratings)
+alongside compound score and nearest attraction leads to our
+best-performing model for both classification approaches (71.65% and
+86.28% respectively). This demonstrates that user engagement metrics
+contain valuable signal for predicting business ratings.</p>
+</div>
+<div id="random-forest-1" class="section level3">
+<h3>Random Forest 1</h3>
+<p>Using compound score and nearest attraction category, this model
+performs similarly to XGBoost 2 for the three-class problem (70.76%).
+The consistent performance across different algorithms confirms these
+features are robust predictors.</p>
+</div>
+<div id="random-forest-2" class="section level3">
+<h3>Random Forest 2</h3>
+<p>Our most feature-rich model incorporates sentiment data (both
+compound score and sentiment label) with user engagement metrics and
+location information. While it performs well (71.38%), it doesn’t
+significantly outperform XGBoost 3 despite using more features,
+suggesting potential feature redundancy.</p>
+</div>
+</div>
+<div id="conclusion" class="section level2">
+<h2>Conclusion</h2>
+<p>Key findings include:</p>
+<ul>
+<li><strong>XGBoost 3</strong> is the top performer in the
+<strong>multi-class</strong> classification task, achieving the highest
+test accuracy (71.65%). Its success is driven by the inclusion of user
+engagement features (<code>useful</code>, <code>funny</code>,
+<code>cool</code>) alongside sentiment and location data.</li>
+<li><strong>XGBoost 2</strong>, which uses <code>compound_score</code>
+and <code>nearest_attraction_category</code>, outperforms other models
+in the <strong>binary classification</strong> task (test accuracy:
+85.66%). This highlights the value of continuous sentiment scores in
+distinguishing between “low” and “high” ratings.</li>
+<li>Across all models, the <strong>binary classification task
+consistently yields higher accuracy (~15 percentage points
+more)</strong> than the multi-class task. This suggests that businesses
+with a rating of exactly 3 (“medium”) are harder to categorize and
+introduce ambiguity into the model.</li>
+<li>Removing the “medium” class simplified the task and resulted in
+stronger performance, which can be useful in applications where only a
+positive vs. negative classification is needed.</li>
+<li>User engagement features and location context (such as the nearest
+tourist attraction category) proved valuable, especially when combined
+with sentiment data.</li>
+<li>Both <strong>XGBoost</strong> and <strong>Random Forest</strong>
+performed comparably, though XGBoost generally had a slight
+edge—especially in handling nuanced feature interactions.</li>
+</ul>
+<p>Overall, this analysis shows that a combination of <strong>sentiment
+analysis</strong>, <strong>engagement metrics</strong>, and
+<strong>location-based features</strong> offers the strongest predictive
+signal for Yelp business ratings. Depending on the application, choosing
+between a nuanced multi-class model and a simpler, more accurate binary
+model can be informed by this trade-off.</p>
+</div>
+
+<p>Copyright &copy; 2025. Naura Taufiq.</p>
+
+
+</div>
+</div>
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.odd').parent('tbody').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- tabsets -->
+
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+
+$(document).ready(function () {
+  $('.tabset-dropdown > .nav-tabs > li').click(function () {
+    $(this).parent().toggleClass('nav-tabs-open');
+  });
+});
+</script>
+
+<!-- code folding -->
+
+<script>
+$(document).ready(function ()  {
+
+    // temporarily add toc-ignore selector to headers for the consistency with Pandoc
+    $('.unlisted.unnumbered').addClass('toc-ignore')
+
+    // move toc-ignore selectors from section div to header
+    $('div.section.toc-ignore')
+        .removeClass('toc-ignore')
+        .children('h1,h2,h3,h4,h5').addClass('toc-ignore');
+
+    // establish options
+    var options = {
+      selectors: "h1,h2,h3",
+      theme: "bootstrap3",
+      context: '.toc-content',
+      hashGenerator: function (text) {
+        return text.replace(/[.\\/?&!#<>]/g, '').replace(/\s/g, '_');
+      },
+      ignoreSelector: ".toc-ignore",
+      scrollTo: 0
+    };
+    options.showAndHide = true;
+    options.smoothScroll = true;
+
+    // tocify
+    var toc = $("#TOC").tocify(options).data("toc-tocify");
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

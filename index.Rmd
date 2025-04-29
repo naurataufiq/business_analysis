@@ -1,10 +1,17 @@
 ---
-title: "JSC370 Final Project"
-author: "Naura Taufiq"
-output: 
-    html_document:
-        toc: TRUE
-        toc_float: TRUE
+title: "Exploring Yelp Toronto Businesses and Their
+Reviews in Relation to Nearby Attractions"
+output: html_document
+---
+## Welcome!
+
+Welcome to my data project: **Exploring Yelp Toronto Businesses and Their Reviews in Relation to Nearby Attractions**.
+
+This project investigates how Toronto businesses listed on Yelp relate to nearby tourist attractions, using geographic and review data to uncover meaningful patterns. The analysis includes data cleaning, spatial matching, exploratory data analysis (EDA), and predictive modeling.
+
+- 📄 For the **full, extensive report**, please click [here to download the PDF](report.pdf) or [here to view it online](report.html).
+- 🧪 To view the **mid-project progress report**, click [here](mid_report.pdf).
+
 ---
 
-This is my JSC370 Final Project website.
+Thank you for visiting, and feel free to explore!
