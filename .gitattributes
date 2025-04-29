@@ -1,3 +1,5 @@
+*.csv filter=lfs diff=lfs merge=lfs -text
+_site/data/* filter=lfs diff=lfs merge=lfs -text
 yelp_review_ny_tor.csv filter=lfs diff=lfs merge=lfs -text
 _site/data/reviews_tor_final.csv filter=lfs diff=lfs merge=lfs -text
 _site/data/merged_data.csv filter=lfs diff=lfs merge=lfs -text
