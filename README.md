@@ -22,6 +22,4 @@ The main objectives of this project are:
 - Machine learning models for predicting business rating and review volume.
 
 ## 🌐 Website
-
-You can view the final report and visualizations here:  
-📄 [View the full report here](https://naurataufiq.github.io/business_analysis)
+📄 [Come to my website!](https://naurataufiq.github.io/business_analysis)
